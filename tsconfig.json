@@ -1,3 +1,33 @@
 {
+	"$schema": "https://raw.githubusercontent.com/Effect-TS/language-service/refs/heads/main/schema.json",
+	"compilerOptions": {
+		"plugins": [
+			{
+				"diagnosticSeverity": {
+					"asyncFunction": "warning",
+					"cryptoRandomUUID": "warning",
+					"cryptoRandomUUIDInEffect": "warning",
+					"extendsNativeError": "warning",
+					"globalConsole": "warning",
+					"globalConsoleInEffect": "warning",
+					"globalDate": "warning",
+					"globalDateInEffect": "warning",
+					"globalFetch": "warning",
+					"globalFetchInEffect": "warning",
+					"globalRandom": "warning",
+					"globalRandomInEffect": "warning",
+					"globalTimers": "warning",
+					"globalTimersInEffect": "warning",
+					"instanceOfSchema": "warning",
+					"newPromise": "warning",
+					"nodeBuiltinImport": "warning",
+					"preferSchemaOverJson": "warning",
+					"processEnv": "warning",
+					"processEnvInEffect": "warning"
+				},
+				"name": "@effect/language-service"
+			}
+		]
+	},
 	"extends": ["@savvy-web/rslib-builder/tsconfig/ecma/lib.json"]
 }

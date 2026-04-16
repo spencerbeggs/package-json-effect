@@ -1,74 +1,124 @@
-# pnpm-module-template
+# package-json-effect
 
-A personal template repository by
-[C. Spencer Beggs](https://spencerbeg.gs) for developing and publishing Node.js
-modules to [npm](https://www.npmjs.com/) and
-[GitHub Packages](https://github.com/features/packages).
+Effect-TS library for reading, writing, parsing, and manipulating package.json files.
 
-You're welcome to clone or fork this template for your own use.
+## Features
 
-## What's Included
+- Typed schemas for all standard package.json fields, with branded types for package names, versions, and SPDX licenses
+- `Package` domain class with property getters and dual-API mutation methods (data-first and pipeable)
+- Swappable services for reading, writing, formatting, transforming, and validating — swap any step without touching the others
+- `sort-package-json`-style key ordering and alphabetical dependency sorting on write
+- `makePackageJsonSchema` factory for adding custom field schemas while preserving all standard fields
+- SemVer integration via `semver-effect` — the `version` field decodes to a typed `SemVer` instance
 
-- **Build pipeline** — Dual-output builds (development + production) via
-  [Rslib](https://rslib.rs/) with automatic `package.json` transformation for
-  publishing
-- **Code quality** — [Biome](https://biomejs.dev/) for linting and formatting,
-  with git hooks for pre-commit checks and commit message validation
-- **Testing** — [Vitest](https://vitest.dev/) with v8 coverage
-- **Versioning** — [Changesets](https://github.com/changesets/changesets) for
-  version management and changelog generation
-- **CI/CD** — GitHub Actions for automated testing, building, and publishing
-  with provenance attestation
-- **TypeScript** — Strict mode, composite builds, ESM-first with `.js` import
-  extensions
+## Installation
+
+```bash
+npm install package-json-effect
+```
+
+Peer dependencies required:
+
+```bash
+npm install effect @effect/platform
+```
 
 ## Quick Start
 
-1. Click **"Use this template"** on GitHub (or clone the repo directly)
-2. Update `package.json` with your package name, repository URL, and homepage
-3. Update the `repo` field in `.changeset/config.json`
-4. Replace the placeholder code in `src/` with your own
-5. Install dependencies:
+```typescript
+import { PackageJsonLive, PackageJsonReader, PackageJsonWriter, Package } from "package-json-effect";
+import { NodeFileSystem } from "@effect/platform-node";
+import { Effect } from "effect";
 
-   ```bash
-   pnpm install
-   ```
+const program = Effect.gen(function* () {
+ const reader = yield* PackageJsonReader;
+ const writer = yield* PackageJsonWriter;
 
-6. Start developing:
+ const pkg = yield* reader.read("./package.json");
+ console.log(pkg.name, pkg.version.toString(), pkg.isESM);
 
-   ```bash
-   pnpm run test:watch    # Run tests in watch mode
-   pnpm run lint:fix      # Auto-fix lint issues
-   pnpm run build         # Build dev + prod outputs
-   ```
+ const updated = yield* pkg.pipe(Package.setVersion("1.2.0"));
+ yield* writer.write("./package.json", updated);
+});
 
-## Project Structure
-
-```text
-src/               Source code and tests
-lib/configs/       Shared tool configurations (commitlint, lint-staged, markdownlint)
-dist/dev/          Development build output
-dist/npm/          Production build output (published to registries)
-.github/workflows/ CI/CD workflows
-.changeset/        Changeset configuration
+Effect.runPromise(
+ program.pipe(
+  Effect.provide(PackageJsonLive),
+  Effect.provide(NodeFileSystem.layer),
+ ),
+);
 ```
 
-## Publishing
+## Package class
 
-Packages are published to both npm and GitHub Packages with provenance
-attestation. The build pipeline automatically transforms `package.json` for
-publishing — the source file stays `"private": true` and the builder handles the
-rest.
+Property getters:
 
-See the [Changesets documentation](https://github.com/changesets/changesets) for
-how versioning and releases work.
+```typescript
+pkg.name          // string
+pkg.version       // SemVer (from semver-effect)
+pkg.isScoped      // boolean — true if name starts with @
+pkg.isESM         // boolean — true if "type": "module"
+pkg.isPrivate     // boolean
+pkg.hasDependency("effect")  // boolean — checks all four dep maps
+```
 
-## Claude Code
+Mutation methods (data-first and pipeable):
 
-This template includes configuration for
-[Claude Code](https://docs.anthropic.com/en/docs/claude-code). See
-[CLAUDE.md](CLAUDE.md) for details on the design-first development workflow.
+```typescript
+// Data-first
+const v1 = yield* Package.setVersion(pkg, "2.0.0");
+const v2 = Package.addDependency(pkg, "zod", "^3.0.0");
+
+// Pipeable
+const v3 = yield* pkg.pipe(Package.setVersion("2.0.0"));
+const v4 = pkg.pipe(Package.addDependency("zod", "^3.0.0"));
+```
+
+Available mutation methods: `setVersion`, `setName`, `setLicense`, `addDependency`, `removeDependency`, `setScript`, `removeScript`.
+
+## Schema extensibility
+
+Add custom fields while keeping all standard package.json types:
+
+```typescript
+import { makePackageJsonSchema } from "package-json-effect";
+import { Schema } from "effect";
+
+const MySchema = makePackageJsonSchema({
+ myToolConfig: Schema.optionalWith(Schema.String, { as: "Option" }),
+});
+```
+
+## Services
+
+| Service | Description |
+| ------- | ----------- |
+| `PackageJsonReader` | Read and decode a package.json file into a `Package` |
+| `PackageJsonWriter` | Encode and write a `Package` back to disk |
+| `PackageJsonFormatter` | Sort keys and dependency entries before serialization |
+| `PackageJsonTransformer` | Strip empty dependency maps before formatting |
+| `PackageJsonValidator` | Run validation rules against a `Package` |
+| `CatalogResolver` | Resolve `catalog:` protocol specifiers (no-op by default) |
+| `WorkspaceResolver` | Resolve `workspace:` protocol specifiers (no-op by default) |
+
+`PackageJsonLive` is a composite layer that provides all seven services. It requires `FileSystem` from `@effect/platform`.
+
+Custom validation rules:
+
+```typescript
+import { makePackageJsonValidatorLive } from "package-json-effect";
+
+const MyValidatorLive = makePackageJsonValidatorLive({
+ rules: [
+  {
+   name: "has-keywords",
+   validate: (pkg) =>
+    pkg._data.keywords ? Effect.void : Effect.fail({ message: "Missing keywords" }),
+  },
+ ],
+});
+```
 
 ## License
 
-[MIT](LICENSE)
+[MIT](./LICENSE)

@@ -1,0 +1,57 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`PackageJsonReader integration > boilerplate fixture > snapshot of boilerplate metadata 1`] = `
+{
+  "devDependencyNames": [
+    "@savvy-web/changesets",
+    "@savvy-web/commitlint",
+    "@savvy-web/lint-staged",
+    "@savvy-web/rslib-builder",
+    "@savvy-web/vitest",
+  ],
+  "isESM": true,
+  "isPrivate": true,
+  "isScoped": true,
+  "license": "MIT",
+  "name": "@savvy-web/pnpm-module-template",
+  "scriptNames": [
+    "build",
+    "build:dev",
+    "build:inspect",
+    "build:prod",
+    "ci:build",
+    "ci:test",
+    "ci:version",
+    "commit:check",
+    "commit:init",
+    "lint",
+    "lint:fix",
+    "lint:fix:unsafe",
+    "lint:md",
+    "lint:md:fix",
+    "prepare",
+    "test",
+    "test:coverage",
+    "test:watch",
+    "typecheck",
+    "types:check",
+  ],
+  "version": "0.0.0",
+}
+`;
+
+exports[`PackageJsonReader integration > full fixture > snapshot of decoded package 1`] = `
+{
+  "dependencyCount": 2,
+  "description": "A full package with all typed fields",
+  "devDependencyCount": 2,
+  "isESM": true,
+  "isPrivate": true,
+  "isScoped": true,
+  "license": "MIT",
+  "name": "@scope/full-pkg",
+  "peerDependencyCount": 1,
+  "scriptCount": 3,
+  "version": "2.1.0",
+}
+`;

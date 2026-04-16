@@ -19,7 +19,7 @@
 				"!.husky/**",
 				"!.vscode/**"
 			],
-			"outputLogs": "full",
+			"outputLogs": "errors-only",
 			"outputs": ["dist/dev/**", ".rslib/declarations/dev/**"]
 		},
 		"build:prod": {
@@ -43,7 +43,7 @@
 			"outputs": ["dist/npm/**", ".rslib/declarations/npm/**"]
 		},
 		"types:check": {
-			"cache": true,
+			"cache": false,
 			"dependsOn": [],
 			"inputs": [
 				"$TURBO_DEFAULT$",
@@ -54,7 +54,7 @@
 				"!.husky/**",
 				"!.vscode/**"
 			],
-			"outputLogs": "errors-only",
+			"outputLogs": "full",
 			"outputs": []
 		}
 	}
