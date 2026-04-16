@@ -1,6 +1,6 @@
 {
 	"name": "package-json-effect",
-	"version": "0.0.0",
+	"version": "0.1.0",
 	"private": true,
 	"description": "Utility library for working with package.json files in Effect",
 	"homepage": "https://github.com/spencerbeggs/package-json-effect#readme",
