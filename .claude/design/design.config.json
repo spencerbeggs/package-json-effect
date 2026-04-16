@@ -1,0 +1,9 @@
+{
+	"modules": {
+		"package-json-effect": {
+			"path": ".",
+			"designDocsPath": ".claude/design/package-json-effect",
+			"categories": ["architecture", "integration"]
+		}
+	}
+}

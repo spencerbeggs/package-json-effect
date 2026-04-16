@@ -177,3 +177,9 @@ workflow. The GitHub Action is at
 - **Config**: `vitest.config.ts` uses the `VitestConfig.create()` factory from
   `@savvy-web/vitest`, which supports project-based filtering via `--project`
 - **CI**: `pnpm run ci:test` sets `CI=true` and enables coverage
+
+<!-- effect-language-service:start -->
+## Effect Language Service
+
+The Effect Language Service comes in with a useful CLI that can help you with commands to get a better understanding your Effect Layers and Services, and to help you compose them correctly.
+<!-- effect-language-service:end -->

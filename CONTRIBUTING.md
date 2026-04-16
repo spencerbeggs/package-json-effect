@@ -1,139 +1,62 @@
-# Contributing to Claude Design Coordinator
-
-Thank you for your interest in contributing to Claude Design Coordinator! This
-document provides guidelines and instructions for development.
+# Contributing
 
 ## Prerequisites
 
-- Node.js 20+
+- Node.js 24+
 - pnpm 10+
 
-## Development Setup
+## Setup
 
 ```bash
-# Clone the repository
-git clone https://github.com/spencerbeggs/claude-design-coordinator.git
-cd claude-design-coordinator
-
-# Install dependencies
+git clone https://github.com/spencerbeggs/package-json-effect.git
+cd package-json-effect
 pnpm install
-
-# Build all packages
-pnpm run build
-
-# Run tests
-pnpm run test
 ```
 
-## Running Locally
+## Development commands
+
+| Command | Description |
+| ------- | ----------- |
+| `pnpm test` | Run all tests |
+| `pnpm test:watch` | Run tests in watch mode |
+| `pnpm test:coverage` | Run tests with v8 coverage report |
+| `pnpm lint` | Check code with Biome |
+| `pnpm lint:fix` | Auto-fix lint issues |
+| `pnpm typecheck` | Type-check via Turbo |
+| `pnpm build` | Build dev and prod outputs |
+| `pnpm build:dev` | Build development output only |
+| `pnpm build:prod` | Build production output only |
+
+## Code quality
+
+Linting and formatting are handled by [Biome](https://biomejs.dev/). The configuration
+extends `@savvy-web/lint-staged/biome/silk.jsonc`. Biome runs automatically on staged
+files before each commit via Husky and lint-staged.
+
+Tests use [Vitest](https://vitest.dev/) with the `forks` pool and v8 coverage. Build
+orchestration uses [Turbo](https://turbo.build/).
+
+## Commits
+
+All commits require:
+
+1. Conventional commit format: `feat`, `fix`, `chore`, `docs`, `test`, etc.
+2. DCO signoff: `Signed-off-by: Your Name <your@email.com>`
+
+Add a signoff automatically with:
 
 ```bash
-# Start the server (from built output)
-node pkgs/claude-coordinator-server/dist/dev/bin/cli.js
-
-# In another terminal, test the MCP bridge
-node pkgs/claude-coordinator-mcp/dist/dev/bin/cli.js
+git commit -s -m "feat: add support for funding field"
 ```
 
-## Project Structure
+## Pull requests
 
-```text
-claude-design-coordinator/
-├── pkgs/
-│   ├── claude-coordinator-core/    # Zod schemas and TypeScript types
-│   ├── claude-coordinator-server/  # tRPC WebSocket server
-│   └── claude-coordinator-mcp/     # MCP stdio bridge
-├── lib/
-│   └── configs/                    # Shared configuration files
-└── ...
-```
+1. Branch from `main`
+2. Keep changes focused — one feature or fix per PR
+3. Ensure all tests pass: `pnpm test`
+4. Ensure type-checking passes: `pnpm typecheck`
+5. Ensure lint passes: `pnpm lint`
+6. Open a PR against `main` and describe what changed and why
 
-## Available Scripts
-
-| Script | Description |
-| ------ | ----------- |
-| `pnpm run build` | Build all packages (dev + prod) |
-| `pnpm run test` | Run all tests |
-| `pnpm run lint` | Check code with Biome |
-| `pnpm run lint:fix` | Auto-fix lint issues |
-| `pnpm run typecheck` | Type-check all workspaces |
-
-## Code Quality
-
-This project uses:
-
-- **Biome** for linting and formatting
-- **Commitlint** for enforcing conventional commits
-- **Husky** for Git hooks
-
-### Commit Format
-
-All commits must follow the [Conventional Commits](https://conventionalcommits.org)
-specification and include a DCO signoff:
-
-```text
-feat: add new coordinator tool
-
-Signed-off-by: Your Name <your.email@example.com>
-```
-
-### Pre-commit Hooks
-
-The following checks run automatically:
-
-- **pre-commit**: Runs lint-staged
-- **commit-msg**: Validates commit message format
-- **pre-push**: Runs tests for affected packages
-
-## Testing
-
-Tests use [Vitest](https://vitest.dev) with v8 coverage.
-
-```bash
-# Run all tests
-pnpm run test
-
-# Run tests in watch mode
-pnpm run test:watch
-
-# Run tests with coverage
-pnpm run test:coverage
-
-# Run tests for a specific package
-pnpm run test -- --filter=@spencerbeggs/claude-coordinator-core
-```
-
-## TypeScript
-
-- Composite builds with project references
-- Strict mode enabled
-- ES2022/ES2023 targets
-- Import extensions required (`.js` for ESM)
-
-### Import Conventions
-
-```typescript
-// Use .js extensions for relative imports (ESM requirement)
-import { AgentSchema } from "./schemas/agent.js";
-
-// Use node: protocol for Node.js built-ins
-import { EventEmitter } from "node:events";
-
-// Separate type imports
-import type { Agent } from "./schemas/agent.js";
-```
-
-## Submitting Changes
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feat/my-feature`
-3. Make your changes
-4. Run tests: `pnpm run test`
-5. Run linting: `pnpm run lint:fix`
-6. Commit with conventional format and DCO signoff
-7. Push and open a pull request
-
-## License
-
-By contributing, you agree that your contributions will be licensed under the
-MIT License.
+Versioning is managed via [Changesets](https://github.com/changesets/changesets).
+If your change affects the public API or fixes a bug, include a changeset.
