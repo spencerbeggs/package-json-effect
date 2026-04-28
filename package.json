@@ -45,7 +45,7 @@
 		"spdx-expression-parse": "^4.0.0"
 	},
 	"devDependencies": {
-		"@effect/language-service": "^0.85.1",
+		"@effect/language-service": "catalog:silk",
 		"@effect/platform": "catalog:silk",
 		"@effect/platform-node": "catalog:silk",
 		"@savvy-web/changesets": "^0.8.0",
