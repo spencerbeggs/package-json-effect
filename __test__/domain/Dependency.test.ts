@@ -1,5 +1,6 @@
+import { Option } from "effect";
 import { describe, expect, it } from "vitest";
-import { Dependency } from "../../src/domain/Dependency.js";
+import { Dependency, isUnresolvedDependency } from "../../src/domain/Dependency.js";
 import { DevDependency } from "../../src/domain/DevDependency.js";
 import { OptionalDependency } from "../../src/domain/OptionalDependency.js";
 import { PeerDependency } from "../../src/domain/PeerDependency.js";
@@ -56,5 +57,49 @@ describe("OptionalDependency", () => {
 	it("has _tag OptionalDependency", () => {
 		const dep = new OptionalDependency({ name: "fsevents", specifier: "^2.0.0" });
 		expect(dep._tag).toBe("OptionalDependency");
+	});
+});
+
+describe("Dependency protocol taxonomy", () => {
+	const protoOf = (s: string) => Option.getOrNull(new Dependency({ name: "x", specifier: s }).protocol);
+
+	it("classifies every protocol", () => {
+		expect(protoOf("^1.0.0")).toBe("range");
+		expect(protoOf("1.2.3")).toBe("range");
+		expect(protoOf("latest")).toBe("tag");
+		expect(protoOf("git+https://github.com/u/r.git")).toBe("git");
+		expect(protoOf("https://example.com/p.tgz")).toBe("url");
+		expect(protoOf("npm:lodash@^4")).toBe("npm");
+		expect(protoOf("file:../local")).toBe("file");
+		expect(protoOf("link:../local")).toBe("link");
+		expect(protoOf("portal:../local")).toBe("portal");
+		expect(protoOf("catalog:silk")).toBe("catalog");
+		expect(protoOf("workspace:*")).toBe("workspace");
+	});
+
+	it("exposes convenience getters", () => {
+		const link = new Dependency({ name: "x", specifier: "link:../l" });
+		expect(link.isLocal).toBe(true);
+		expect(link.isLink).toBe(true);
+		expect(link.isPortal).toBe(false);
+		expect(link.isUnresolved).toBe(false);
+
+		const portal = new Dependency({ name: "x", specifier: "portal:../p" });
+		expect(portal.isLocal).toBe(true);
+		expect(portal.isPortal).toBe(true);
+		expect(portal.isLink).toBe(false);
+
+		const cat = new Dependency({ name: "x", specifier: "catalog:silk" });
+		expect(cat.isCatalog).toBe(true);
+		expect(cat.isUnresolved).toBe(true);
+		expect(isUnresolvedDependency(cat)).toBe(true);
+		expect(isUnresolvedDependency(link)).toBe(false);
+	});
+
+	it("parses a semver range via semver-effect", () => {
+		const dep = new Dependency({ name: "x", specifier: "^1.2.0" });
+		expect(Option.isSome(dep.range)).toBe(true);
+		const tag = new Dependency({ name: "x", specifier: "latest" });
+		expect(Option.isNone(tag.range)).toBe(true);
 	});
 });

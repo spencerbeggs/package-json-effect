@@ -1,124 +1,72 @@
 # package-json-effect
 
-Effect-TS library for reading, writing, parsing, and manipulating package.json files.
+[![npm](https://img.shields.io/npm/v/package-json-effect?label=npm&color=cb3837)](https://www.npmjs.com/package/package-json-effect)
+[![License: MIT](https://img.shields.io/badge/License-MIT-4caf50.svg)](https://opensource.org/licenses/MIT)
+
+An [Effect](https://effect.website) library for reading, writing, parsing, validating and normalizing `package.json` files. It decodes a file into a typed `Package` model — `version` becomes a `SemVer`, optional fields become `Option`, dependency maps become `HashMap` — and writes it back with consistent key ordering. Reading, formatting, validation and dependency resolution are each a swappable `Layer`, so you keep the parts you want and replace the rest.
 
 ## Features
 
-- Typed schemas for all standard package.json fields, with branded types for package names, versions, and SPDX licenses
-- `Package` domain class with property getters and dual-API mutation methods (data-first and pipeable)
-- Swappable services for reading, writing, formatting, transforming, and validating — swap any step without touching the others
-- `sort-package-json`-style key ordering and alphabetical dependency sorting on write
-- `makePackageJsonSchema` factory for adding custom field schemas while preserving all standard fields
-- SemVer integration via `semver-effect` — the `version` field decodes to a typed `SemVer` instance
+- Typed `Package` model decoded from a `package.json` file: `version` is a `SemVer`, optional fields are `Option`, dependency and script maps are `HashMap`
+- Computed getters (`isScoped`, `isESM`, `isPrivate`, `hasDependency`) and a dual-API for immutable mutations (data-first `Package.setVersion(pkg, v)`, curried `Package.setVersion(v)(pkg)` and pipeable `pkg.pipe(Package.setVersion(v))`)
+- `Dependency`, `DevDependency`, `PeerDependency` and `OptionalDependency` instances with a protocol taxonomy (`isRange`, `isTag`, `isGit`, `isLocal`, `isWorkspace`, `isCatalog`) that classifies any specifier
+- A reader and writer backed by `@effect/platform` FileSystem, with `sort-package-json`-style key ordering and alphabetical dependency sorting applied on write
+- Unknown top-level fields preserved through a read/write round-trip, so you never lose tooling config you do not model
+- A validator with publish-readiness rules and a `ValidationRule` interface for writing your own
+- A `package-json-effect/schema` entry point: extend the model with `.extend()` and rebuild the wire schema with `makePackageJsonSchema` to type custom fields
+- `catalog:` and `workspace:` resolution through swappable `CatalogResolver` and `WorkspaceResolver` services
 
-## Installation
+## Install
 
-```bash
-npm install package-json-effect
-```
-
-Peer dependencies required:
+`effect` and `@effect/platform` are peer dependencies. Install them alongside a platform adapter for your runtime — `@effect/platform-node` for Node.js.
 
 ```bash
-npm install effect @effect/platform
+npm install package-json-effect effect @effect/platform @effect/platform-node
+# or
+pnpm add package-json-effect effect @effect/platform @effect/platform-node
 ```
 
-## Quick Start
+## Quick start
+
+Read a file, inspect it through the typed getters, make an immutable edit and write it back. The program yields the `PackageJsonReader` and `PackageJsonWriter` services and runs with the composite `PackageJsonLive` layer plus a FileSystem layer.
 
 ```typescript
-import { PackageJsonLive, PackageJsonReader, PackageJsonWriter, Package } from "package-json-effect";
 import { NodeFileSystem } from "@effect/platform-node";
 import { Effect } from "effect";
+import { Package, PackageJsonLive, PackageJsonReader, PackageJsonWriter } from "package-json-effect";
 
 const program = Effect.gen(function* () {
- const reader = yield* PackageJsonReader;
- const writer = yield* PackageJsonWriter;
+  const reader = yield* PackageJsonReader;
+  const writer = yield* PackageJsonWriter;
 
- const pkg = yield* reader.read("./package.json");
- console.log(pkg.name, pkg.version.toString(), pkg.isESM);
+  const pkg = yield* reader.read("./package.json");
+  console.log(pkg.name); // the "name" field, a string
+  console.log(pkg.version.toString()); // the "version" field as a SemVer, e.g. "1.3.0"
+  console.log(pkg.isESM); // true when "type": "module"
 
- const updated = yield* pkg.pipe(Package.setVersion("1.2.0"));
- yield* writer.write("./package.json", updated);
+  // Mutations return a new Package; the original is untouched.
+  const bumped = yield* Package.setVersion(pkg, "1.4.0");
+  const withDep = Package.addDependency(bumped, "effect", "^3.10.0");
+
+  yield* writer.write("./package.json", withDep);
 });
 
-Effect.runPromise(
- program.pipe(
-  Effect.provide(PackageJsonLive),
-  Effect.provide(NodeFileSystem.layer),
- ),
-);
+Effect.runPromise(program.pipe(Effect.provide(PackageJsonLive), Effect.provide(NodeFileSystem.layer)));
 ```
 
-## Package class
+`PackageJsonLive` provides every service in the library and requires `FileSystem` from `@effect/platform`, which `NodeFileSystem.layer` (or `NodeContext.layer`) supplies.
 
-Property getters:
+## Documentation
 
-```typescript
-pkg.name          // string
-pkg.version       // SemVer (from semver-effect)
-pkg.isScoped      // boolean — true if name starts with @
-pkg.isESM         // boolean — true if "type": "module"
-pkg.isPrivate     // boolean
-pkg.hasDependency("effect")  // boolean — checks all four dep maps
-```
-
-Mutation methods (data-first and pipeable):
-
-```typescript
-// Data-first
-const v1 = yield* Package.setVersion(pkg, "2.0.0");
-const v2 = Package.addDependency(pkg, "zod", "^3.0.0");
-
-// Pipeable
-const v3 = yield* pkg.pipe(Package.setVersion("2.0.0"));
-const v4 = pkg.pipe(Package.addDependency("zod", "^3.0.0"));
-```
-
-Available mutation methods: `setVersion`, `setName`, `setLicense`, `addDependency`, `removeDependency`, `setScript`, `removeScript`.
-
-## Schema extensibility
-
-Add custom fields while keeping all standard package.json types:
-
-```typescript
-import { makePackageJsonSchema } from "package-json-effect";
-import { Schema } from "effect";
-
-const MySchema = makePackageJsonSchema({
- myToolConfig: Schema.optionalWith(Schema.String, { as: "Option" }),
-});
-```
-
-## Services
-
-| Service | Description |
-| ------- | ----------- |
-| `PackageJsonReader` | Read and decode a package.json file into a `Package` |
-| `PackageJsonWriter` | Encode and write a `Package` back to disk |
-| `PackageJsonFormatter` | Sort keys and dependency entries before serialization |
-| `PackageJsonTransformer` | Strip empty dependency maps before formatting |
-| `PackageJsonValidator` | Run validation rules against a `Package` |
-| `CatalogResolver` | Resolve `catalog:` protocol specifiers (no-op by default) |
-| `WorkspaceResolver` | Resolve `workspace:` protocol specifiers (no-op by default) |
-
-`PackageJsonLive` is a composite layer that provides all seven services. It requires `FileSystem` from `@effect/platform`.
-
-Custom validation rules:
-
-```typescript
-import { makePackageJsonValidatorLive } from "package-json-effect";
-
-const MyValidatorLive = makePackageJsonValidatorLive({
- rules: [
-  {
-   name: "has-keywords",
-   validate: (pkg) =>
-    pkg._data.keywords ? Effect.void : Effect.fail({ message: "Missing keywords" }),
-  },
- ],
-});
-```
+- [Getting started](./docs/01-getting-started.md) — install, the Effect mental model (Option, HashMap, Layer) and providing PackageJsonLive with a FileSystem layer
+- [Reading and writing](./docs/02-reading-and-writing.md) — the reader and writer, formatter key ordering, the transformer and round-trip fidelity for unmodeled fields
+- [The Package model](./docs/03-package-model.md) — computed getters, the Dependency instances and protocol taxonomy, and the dual-API for immutable mutations
+- [Validation](./docs/04-validation.md) — the default rules, publish-readiness rules, writing a ValidationRule and building a validator layer
+- [Extending the schema](./docs/05-extending-the-schema.md) — adding custom fields with .extend() and makePackageJsonSchema via the package-json-effect/schema entry point
+- [Catalog and workspace resolution](./docs/06-catalog-workspace-resolution.md) — the no-op default, providing a real resolver, modifier semantics and resolution on read versus write
+- [Testing](./docs/07-testing.md) — mock layers with Layer.succeed, asserting on typed errors and integration tests against the real filesystem
+- [Errors and troubleshooting](./docs/08-errors-and-troubleshooting.md) — every error type, what triggers it and how to handle it
 
 ## License
 
-[MIT](./LICENSE)
+[MIT](LICENSE)

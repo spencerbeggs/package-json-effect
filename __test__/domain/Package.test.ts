@@ -1,7 +1,11 @@
 import { Effect, HashMap, Option, Schema } from "effect";
 import { describe, expect, it } from "vitest";
+import { Dependency } from "../../src/domain/Dependency.js";
+import { DevDependency } from "../../src/domain/DevDependency.js";
+import { OptionalDependency } from "../../src/domain/OptionalDependency.js";
 import { Package } from "../../src/domain/Package.js";
-import { PackageJsonSchema, makePackageJsonSchema } from "../../src/schemas/package-json.js";
+import { PeerDependency } from "../../src/domain/PeerDependency.js";
+import { PackageJsonSchema } from "../../src/schemas/package-json.js";
 
 const minimalJson = { name: "my-pkg", version: "1.0.0" };
 const fullJson = {
@@ -19,8 +23,7 @@ const fullJson = {
 };
 
 const decodePackage = (json: unknown) => {
-	const schema = Schema.decodeUnknownSync(PackageJsonSchema)(json);
-	return new Package(schema);
+	return Schema.decodeUnknownSync(PackageJsonSchema)(json);
 };
 
 describe("Package getters", () => {
@@ -174,7 +177,7 @@ describe("Package.setLicense", () => {
 		expect(Option.getOrThrow(updated.license)).toBe("MIT");
 	});
 
-	it("fails for invalid SPDX", async () => {
+	it("fails for invalid SPDX with InvalidSpdxLicenseError", async () => {
 		const pkg = decodePackage(minimalJson);
 		const exit = await Effect.runPromiseExit(Package.setLicense(pkg, "NOT-A-LICENSE"));
 		expect(exit._tag).toBe("Failure");
@@ -182,34 +185,150 @@ describe("Package.setLicense", () => {
 });
 
 describe("Package.fromData", () => {
-	it("creates a Package from custom schema data", () => {
-		const CustomSchema = makePackageJsonSchema({
-			description: Schema.String, // now required
-		});
-
-		const decoded = Schema.decodeUnknownSync(CustomSchema)({
+	it("round-trips a decoded Package", () => {
+		const decoded = Schema.decodeUnknownSync(PackageJsonSchema)({
 			name: "custom-pkg",
 			version: "1.0.0",
-			description: "Required description",
+			description: "A package",
 		});
 
 		const pkg = Package.fromData(decoded);
 		expect(pkg.name).toBe("custom-pkg");
+		expect(pkg.version.major).toBe(1);
+		expect(Option.getOrNull(pkg.description)).toBe("A package");
 	});
 
-	it("preserves custom fields through the Package", () => {
-		const CustomSchema = makePackageJsonSchema({
-			customField: Schema.String,
-		});
-
-		const decoded = Schema.decodeUnknownSync(CustomSchema)({
+	it("preserves unknown fields from rest through fromData", () => {
+		const decoded = Schema.decodeUnknownSync(PackageJsonSchema)({
 			name: "custom-pkg",
 			version: "1.0.0",
-			customField: "hello",
+			extraField: "hello",
 		});
 
 		const pkg = Package.fromData(decoded);
 		expect(pkg.name).toBe("custom-pkg");
-		expect((pkg._data as Record<string, unknown>).customField).toBe("hello");
+		// extra fields are captured in rest
+		expect((pkg.rest as Record<string, unknown>).extraField).toBe("hello");
+	});
+});
+
+describe("Package scalar/collection getters", () => {
+	const pkg = Schema.decodeUnknownSync(PackageJsonSchema)({
+		name: "@scope/pkg",
+		version: "2.1.0",
+		description: "desc",
+		private: true,
+		type: "module",
+		license: "MIT",
+		scripts: { test: "vitest" },
+		bin: "./cli.js",
+		engines: { node: ">=18" },
+	});
+
+	it("exposes typed scalar getters", () => {
+		expect(pkg.isPrivate).toBe(true);
+		expect(pkg.isScoped).toBe(true);
+		expect(pkg.isESM).toBe(true);
+		expect(Option.getOrNull(pkg.description)).toBe("desc");
+		expect(Option.getOrNull(pkg.license)).toBe("MIT");
+	});
+
+	it("exposes bin and engines", () => {
+		expect(Option.isSome(pkg.bin)).toBe(true);
+		expect(Option.isSome(pkg.engines)).toBe(true);
+		const engines = Option.getOrThrow(pkg.engines);
+		expect(HashMap.get(engines, "node")._tag).toBe("Some");
+	});
+
+	it("exposes scripts as a HashMap", () => {
+		expect(HashMap.get(pkg.scripts, "test")._tag).toBe("Some");
+	});
+});
+
+describe("Package dependency instances", () => {
+	const pkg = Schema.decodeUnknownSync(PackageJsonSchema)({
+		name: "p",
+		version: "1.0.0",
+		dependencies: { lodash: "^4.0.0", local: "workspace:*" },
+		devDependencies: { vitest: "^1.0.0" },
+		peerDependencies: { effect: "^3.0.0" },
+		peerDependenciesMeta: { effect: { optional: true } },
+		optionalDependencies: { fsevents: "^2.0.0" },
+	});
+
+	it("returns Dependency instances from getDependencies()", () => {
+		const deps = pkg.getDependencies();
+		const lodash = Option.getOrThrow(HashMap.get(deps, "lodash"));
+		expect(lodash).toBeInstanceOf(Dependency);
+		expect(lodash.specifier).toBe("^4.0.0");
+		const local = Option.getOrThrow(HashMap.get(deps, "local"));
+		expect(local.isWorkspace).toBe(true);
+	});
+
+	it("returns DevDependency instances", () => {
+		const dev = Option.getOrThrow(HashMap.get(pkg.getDevDependencies(), "vitest"));
+		expect(dev).toBeInstanceOf(DevDependency);
+	});
+
+	it("returns PeerDependency with isOptional from meta", () => {
+		const peer = Option.getOrThrow(HashMap.get(pkg.getPeerDependencies(), "effect"));
+		expect(peer).toBeInstanceOf(PeerDependency);
+		expect(peer.isOptional).toBe(true);
+	});
+
+	it("returns OptionalDependency instances from getOptionalDependencies()", () => {
+		const opt = Option.getOrThrow(HashMap.get(pkg.getOptionalDependencies(), "fsevents"));
+		expect(opt).toBeInstanceOf(OptionalDependency);
+		expect(opt.specifier).toBe("^2.0.0");
+	});
+});
+
+describe("Package.pipe", () => {
+	const base = Schema.decodeUnknownSync(PackageJsonSchema)({ name: "p", version: "1.0.0" });
+
+	it("pipe form and curried form produce the same result for setVersion", async () => {
+		const curried = await Effect.runPromise(Package.setVersion("1.4.0")(base));
+		const piped = await Effect.runPromise(base.pipe(Package.setVersion("1.4.0")));
+		expect(piped.version.major).toBe(1);
+		expect(piped.version.minor).toBe(4);
+		expect(piped.version.patch).toBe(0);
+		expect(piped.version.major).toBe(curried.version.major);
+		expect(piped.version.minor).toBe(curried.version.minor);
+		expect(piped.version.patch).toBe(curried.version.patch);
+	});
+
+	it("pipe form works for addDependency and returns a Package with the dependency", () => {
+		const updated = base.pipe(Package.addDependency("x", "^1.0.0"));
+		expect(HashMap.get(updated.dependencies, "x")._tag).toBe("Some");
+		expect(updated).toBeInstanceOf(Package);
+	});
+});
+
+describe("Package mutations", () => {
+	const base = Schema.decodeUnknownSync(PackageJsonSchema)({ name: "p", version: "1.0.0" });
+
+	it("adds dev/peer/optional dependencies (curried + data-first)", () => {
+		const withDev = Package.addDevDependency("vitest", "^1.0.0")(base);
+		expect(HashMap.get(withDev.devDependencies, "vitest")._tag).toBe("Some");
+		const withPeer = Package.addPeerDependency(base, "effect", "^3.0.0");
+		expect(HashMap.get(withPeer.peerDependencies, "effect")._tag).toBe("Some");
+		const withOpt = Package.addOptionalDependency(base, "fsevents", "^2.0.0");
+		expect(HashMap.get(withOpt.optionalDependencies, "fsevents")._tag).toBe("Some");
+	});
+
+	it("removes dev/peer/optional dependencies", () => {
+		const seeded = Package.addDevDependency("vitest", "^1.0.0")(base);
+		const removed = Package.removeDevDependency(seeded, "vitest");
+		expect(HashMap.get(removed.devDependencies, "vitest")._tag).toBe("None");
+	});
+
+	it("setLicense fails with InvalidSpdxLicenseError", () => {
+		const exit = Effect.runSyncExit(Package.setLicense(base, "NOT-A-LICENSE"));
+		expect(exit._tag).toBe("Failure");
+	});
+
+	it("setLicense succeeds for valid SPDX", () => {
+		const updated = Effect.runSync(Package.setLicense(base, "MIT"));
+		expect(Option.getOrNull(updated.license)).toBe("MIT");
 	});
 });

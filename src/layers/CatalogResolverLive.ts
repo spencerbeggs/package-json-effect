@@ -1,13 +1,11 @@
-import { Effect, Layer } from "effect";
+import { Effect, Layer, Option } from "effect";
 import { CatalogResolver } from "../services/CatalogResolver.js";
 
 /**
- * Default CatalogResolver: no-op passthrough.
- * Replace with a real implementation to resolve catalog: protocol specifiers.
+ * Default CatalogResolver: resolves nothing. Provide a real implementation
+ * (e.g. backed by workspaces-effect) to resolve catalog: specifiers.
  */
 export const CatalogResolverLive: Layer.Layer<CatalogResolver> = Layer.succeed(
 	CatalogResolver,
-	CatalogResolver.of({
-		resolve: (raw) => Effect.succeed(raw),
-	}),
+	CatalogResolver.of({ rangeOf: () => Effect.succeed(Option.none()) }),
 );

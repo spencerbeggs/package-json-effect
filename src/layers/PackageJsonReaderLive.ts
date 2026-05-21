@@ -1,6 +1,5 @@
 import { FileSystem } from "@effect/platform";
 import { Effect, Layer, Option, Schema } from "effect";
-import { Package } from "../domain/Package.js";
 import { PackageJsonDecodeError } from "../errors/PackageJsonDecodeError.js";
 import { PackageJsonNotFoundError } from "../errors/PackageJsonNotFoundError.js";
 import { PackageJsonParseError } from "../errors/PackageJsonParseError.js";
@@ -38,7 +37,7 @@ export const PackageJsonReaderLive: Layer.Layer<PackageJsonReader, never, FileSy
 						},
 					});
 
-					const decoded = yield* Schema.decodeUnknown(PackageJsonSchema)(json).pipe(
+					const pkg = yield* Schema.decodeUnknown(PackageJsonSchema)(json).pipe(
 						Effect.mapError(
 							(cause) =>
 								new PackageJsonDecodeError({
@@ -48,7 +47,7 @@ export const PackageJsonReaderLive: Layer.Layer<PackageJsonReader, never, FileSy
 						),
 					);
 
-					return new Package(decoded);
+					return pkg;
 				}),
 		});
 	}),

@@ -1,5 +1,6 @@
 import { FileSystem } from "@effect/platform";
 import { Effect, Layer, Schema } from "effect";
+import { Package } from "../domain/Package.js";
 import { PackageJsonWriteError } from "../errors/PackageJsonWriteError.js";
 import { PackageJsonSchema } from "../schemas/package-json.js";
 import { CatalogResolver } from "../services/CatalogResolver.js";
@@ -17,21 +18,25 @@ export const PackageJsonWriterLive: Layer.Layer<
 	Effect.gen(function* () {
 		const fs = yield* FileSystem.FileSystem;
 		const formatter = yield* PackageJsonFormatter;
-		const catalogResolver = yield* CatalogResolver;
-		const workspaceResolver = yield* WorkspaceResolver;
 		const transformer = yield* PackageJsonTransformer;
+		const catalog = yield* CatalogResolver;
+		const workspace = yield* WorkspaceResolver;
 
 		return PackageJsonWriter.of({
 			write: (target, pkg) =>
 				Effect.gen(function* () {
-					const encoded = yield* Schema.encode(PackageJsonSchema)(pkg._data).pipe(
+					// Publish-prep: resolve catalog:/workspace: protocols (no-op by default).
+					const resolved = yield* Package.resolve(pkg).pipe(
+						Effect.provideService(CatalogResolver, catalog),
+						Effect.provideService(WorkspaceResolver, workspace),
 						Effect.mapError((cause) => new PackageJsonWriteError({ target, cause })),
 					);
 
-					let raw = encoded as Record<string, unknown>;
-					raw = yield* catalogResolver.resolve(raw);
-					raw = yield* workspaceResolver.resolve(raw);
-					raw = yield* transformer.transform(raw);
+					const encoded = yield* Schema.encode(PackageJsonSchema)(resolved).pipe(
+						Effect.mapError((cause) => new PackageJsonWriteError({ target, cause })),
+					);
+
+					const raw = yield* transformer.transform(encoded as Record<string, unknown>);
 					const formatted = formatter.format(raw);
 					const json = `${JSON.stringify(formatted, null, 2)}\n`;
 

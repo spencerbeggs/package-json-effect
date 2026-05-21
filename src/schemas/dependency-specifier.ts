@@ -1,4 +1,5 @@
-import { Schema } from "effect";
+import { Effect, Schema } from "effect";
+import { InvalidDependencySpecifierError } from "../errors/InvalidDependencySpecifierError.js";
 
 /**
  * Validates a dependency version specifier.
@@ -10,6 +11,8 @@ export const isValidDependencySpecifier = (s: string): boolean => {
 	if (s.length === 0) return false;
 	// Protocols
 	if (s.startsWith("file:")) return true;
+	if (s.startsWith("link:")) return true;
+	if (s.startsWith("portal:")) return true;
 	if (s.startsWith("git+")) return true;
 	if (s.startsWith("git://")) return true;
 	if (s.startsWith("http://") || s.startsWith("https://")) return true;
@@ -35,3 +38,14 @@ export const DependencySpecifier = Schema.String.pipe(
 
 /** Branded type for dependency specifiers. */
 export type DependencySpecifier = Schema.Schema.Type<typeof DependencySpecifier>;
+
+/**
+ * Opt-in decoder: validate a string as a DependencySpecifier, failing with a
+ * typed InvalidDependencySpecifierError instead of a Schema ParseError.
+ */
+export const decodeSpecifier = (input: string): Effect.Effect<DependencySpecifier, InvalidDependencySpecifierError> =>
+	Schema.decodeUnknown(DependencySpecifier)(input).pipe(
+		Effect.mapError(
+			() => new InvalidDependencySpecifierError({ input, reason: "Not a recognized dependency specifier" }),
+		),
+	);
