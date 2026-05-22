@@ -6,6 +6,23 @@
  * @packageDocumentation
  */
 
+export type {
+	DependencyProtocol,
+	DependencyProtocolGetters,
+	UnresolvedDependency,
+} from "./domain/Dependency.js";
+export { Dependency } from "./domain/Dependency.js";
+export { DevDependency } from "./domain/DevDependency.js";
+export { OptionalDependency } from "./domain/OptionalDependency.js";
+export { Package } from "./domain/Package.js";
+export { PeerDependency } from "./domain/PeerDependency.js";
+export { DependencyResolutionError, DependencyResolutionErrorBase } from "./errors/DependencyResolutionError.js";
+export {
+	InvalidDependencySpecifierError,
+	InvalidDependencySpecifierErrorBase,
+} from "./errors/InvalidDependencySpecifierError.js";
+export { InvalidPackageNameError, InvalidPackageNameErrorBase } from "./errors/InvalidPackageNameError.js";
+export { InvalidSpdxLicenseError, InvalidSpdxLicenseErrorBase } from "./errors/InvalidSpdxLicenseError.js";
 export { BinSchema } from "./schemas/bin.js";
 export { DependencyMapSchema } from "./schemas/dependency-map.js";
 export type { DependencySpecifier as DependencySpecifierType } from "./schemas/dependency-specifier.js";
@@ -31,3 +48,5 @@ export type { PublishConfig } from "./schemas/publish-config.js";
 export { PublishConfigSchema } from "./schemas/publish-config.js";
 export { ScriptsSchema } from "./schemas/scripts.js";
 export { VersionSchema } from "./schemas/version.js";
+export { CatalogResolver } from "./services/CatalogResolver.js";
+export { WorkspaceResolver } from "./services/WorkspaceResolver.js";
