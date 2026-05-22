@@ -32,6 +32,18 @@ describe("DependencySpecifier schema", () => {
 		);
 	});
 
+	it("accepts hosted-git prefixes", () => {
+		expect(Schema.decodeUnknownSync(DependencySpecifier)("github:u/r")).toBe("github:u/r");
+		expect(Schema.decodeUnknownSync(DependencySpecifier)("gist:abc")).toBe("gist:abc");
+		expect(Schema.decodeUnknownSync(DependencySpecifier)("bitbucket:u/r")).toBe("bitbucket:u/r");
+		expect(Schema.decodeUnknownSync(DependencySpecifier)("gitlab:u/r")).toBe("gitlab:u/r");
+	});
+
+	it("rejects unrecognized specifiers", () => {
+		expect(() => Schema.decodeUnknownSync(DependencySpecifier)("!!garbage")).toThrow();
+		expect(() => Schema.decodeUnknownSync(DependencySpecifier)("patch:lodash")).toThrow();
+	});
+
 	it("accepts GitHub shorthand", () => {
 		expect(Schema.decodeUnknownSync(DependencySpecifier)("user/repo")).toBe("user/repo");
 		expect(Schema.decodeUnknownSync(DependencySpecifier)("user/repo#branch")).toBe("user/repo#branch");

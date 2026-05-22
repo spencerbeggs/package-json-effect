@@ -78,14 +78,28 @@ A `PeerDependency` additionally carries `isOptional`, populated from the `peerDe
 
 ## Protocol taxonomy
 
-Every dependency instance classifies its specifier. The `protocol` getter returns an `Option<DependencyProtocol>` — `None` for an empty specifier, otherwise one of `"range"`, `"tag"`, `"git"`, `"url"`, `"npm"`, `"file"`, `"link"`, `"portal"`, `"catalog"` or `"workspace"`. Boolean getters answer specific questions:
+Every dependency instance classifies its specifier. The `protocol` getter returns an `Option<DependencyProtocol>` — `None` for an empty specifier, otherwise one of the values in the table below. Boolean getters answer specific questions:
+
+| Protocol | Matched when |
+| -------- | ------------ |
+| `"range"` | A parseable semver range like `^4.0.0` or `1.2.3` |
+| `"tag"` | A dist-tag like `latest` or `next` |
+| `"git"` | A git URL (`git+...`, `git://`) or a hosted-git shorthand (`github:`, `gist:`, `bitbucket:`, `gitlab:`, or bare `user/repo[#ref]`) |
+| `"url"` | An `http://` or `https://` tarball URL |
+| `"npm"` | An `npm:` alias specifier |
+| `"file"` | A `file:` specifier or a bare local path (`./`, `../`, `~/`, `/`) |
+| `"link"` | A `link:` specifier (symlink, no install) |
+| `"portal"` | A `portal:` specifier (pnpm portal) |
+| `"catalog"` | A `catalog:` reference (unresolved) |
+| `"workspace"` | A `workspace:` reference (unresolved) |
+| `"unknown"` | A specifier that does not match any recognized pattern |
 
 | Getter | True when the specifier is |
 | ------ | -------------------------- |
 | `isRange` | A parseable semver range like `^4.0.0` |
 | `isTag` | A dist-tag like `latest` or `next` |
-| `isGit` | A git URL (`git+...`, `git://`, `github:...`) |
-| `isLocal` | A `file:`, `link:` or `portal:` path |
+| `isGit` | A git URL or hosted-git shorthand (see `"git"` above) |
+| `isLocal` | A `file:`, `link:`, `portal:`, or bare local path |
 | `isLink` | A `link:` path specifically |
 | `isPortal` | A `portal:` path specifically |
 | `isCatalog` | A `catalog:` reference |
@@ -126,6 +140,10 @@ import { parseRangeOption, protocolOf } from "package-json-effect";
 console.log(protocolOf("^1.0.0")); // "range"
 console.log(protocolOf("latest")); // "tag"
 console.log(protocolOf("workspace:*")); // "workspace"
+console.log(protocolOf("user/repo")); // "git"
+console.log(protocolOf("github:user/repo")); // "git"
+console.log(protocolOf("../local")); // "file"
+console.log(protocolOf("patch:lodash")); // "unknown"
 console.log(Option.isSome(parseRangeOption("^1.0.0"))); // true
 console.log(Option.isSome(parseRangeOption("latest"))); // false
 ```

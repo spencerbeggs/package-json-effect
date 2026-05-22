@@ -12,7 +12,8 @@ export type DependencyProtocol =
 	| "link"
 	| "portal"
 	| "catalog"
-	| "workspace";
+	| "workspace"
+	| "unknown";
 
 /** The shared protocol-classification getters implemented by every Dependency variant. */
 export interface DependencyProtocolGetters {
@@ -29,13 +30,26 @@ export interface DependencyProtocolGetters {
 	readonly isTag: boolean;
 }
 
-/** Returns true if the specifier points to a local path. */
-export const isLocalSpecifier = (s: string): boolean =>
-	s.startsWith("file:") || s.startsWith("link:") || s.startsWith("portal:");
+const isBarePath = (s: string): boolean =>
+	s.startsWith("./") || s.startsWith("../") || s.startsWith("~/") || s.startsWith("/");
 
-/** Returns true if the specifier points to a git repository. */
+/** Returns true if the specifier points to a local path (file:, link:, portal:, or a bare path). */
+export const isLocalSpecifier = (s: string): boolean =>
+	s.startsWith("file:") || s.startsWith("link:") || s.startsWith("portal:") || isBarePath(s);
+
+/** Bare GitHub shorthand `user/repo[#ref]`, excluding local-path-looking strings. */
+const isGitHubShorthand = (s: string): boolean =>
+	!s.startsWith(".") && !s.startsWith("~") && !s.startsWith("/") && /^[a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+(#.*)?$/.test(s);
+
+/** Returns true if the specifier resolves to a git source (git URLs and hosted-git shorthands). */
 export const isGitSpecifier = (s: string): boolean =>
-	s.startsWith("git+") || s.startsWith("git://") || s.startsWith("github:");
+	s.startsWith("git+") ||
+	s.startsWith("git://") ||
+	s.startsWith("github:") ||
+	s.startsWith("gist:") ||
+	s.startsWith("bitbucket:") ||
+	s.startsWith("gitlab:") ||
+	isGitHubShorthand(s);
 
 /** Returns true if the specifier is a parseable semver range. */
 export const isRangeSpecifier = (s: string): boolean => Option.isSome(parseRangeOption(s));
@@ -46,19 +60,19 @@ export const isTagSpecifier = (s: string): boolean => protocolOf(s) === "tag";
 /** Parse the specifier as a semver Range, returning None when it is not a range. */
 export const parseRangeOption = (s: string): Option.Option<Range> => Effect.runSync(Effect.option(parseRange(s)));
 
-/** Classify a specifier string into a single protocol. */
+/** Classify a specifier string into a single protocol; "unknown" for unrecognized input. */
 export const protocolOf = (s: string): DependencyProtocol => {
 	if (s.startsWith("catalog:")) return "catalog";
 	if (s.startsWith("workspace:")) return "workspace";
-	if (s.startsWith("file:")) return "file";
 	if (s.startsWith("link:")) return "link";
 	if (s.startsWith("portal:")) return "portal";
+	if (s.startsWith("file:") || isBarePath(s)) return "file";
+	if (s.startsWith("npm:")) return "npm";
 	if (isGitSpecifier(s)) return "git";
 	if (s.startsWith("http://") || s.startsWith("https://")) return "url";
-	if (s.startsWith("npm:")) return "npm";
 	if (Option.isSome(parseRangeOption(s))) return "range";
 	if (/^[a-zA-Z][a-zA-Z0-9._-]*$/.test(s)) return "tag";
-	return "range";
+	return "unknown";
 };
 
 export class Dependency

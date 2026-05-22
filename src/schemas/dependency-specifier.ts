@@ -15,6 +15,10 @@ export const isValidDependencySpecifier = (s: string): boolean => {
 	if (s.startsWith("portal:")) return true;
 	if (s.startsWith("git+")) return true;
 	if (s.startsWith("git://")) return true;
+	if (s.startsWith("github:")) return true;
+	if (s.startsWith("gist:")) return true;
+	if (s.startsWith("bitbucket:")) return true;
+	if (s.startsWith("gitlab:")) return true;
 	if (s.startsWith("http://") || s.startsWith("https://")) return true;
 	if (s.startsWith("npm:")) return true;
 	if (s.startsWith("catalog:")) return true;

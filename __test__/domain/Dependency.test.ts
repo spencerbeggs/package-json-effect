@@ -1,6 +1,6 @@
 import { Option } from "effect";
 import { describe, expect, it } from "vitest";
-import { Dependency, isUnresolvedDependency } from "../../src/domain/Dependency.js";
+import { Dependency, isUnresolvedDependency, protocolOf } from "../../src/domain/Dependency.js";
 import { DevDependency } from "../../src/domain/DevDependency.js";
 import { OptionalDependency } from "../../src/domain/OptionalDependency.js";
 import { PeerDependency } from "../../src/domain/PeerDependency.js";
@@ -77,6 +77,30 @@ describe("Dependency protocol taxonomy", () => {
 		expect(protoOf("workspace:*")).toBe("workspace");
 	});
 
+	it("classifies bare GitHub shorthand as git", () => {
+		expect(protocolOf("user/repo")).toBe("git");
+		expect(protocolOf("user/repo#main")).toBe("git");
+	});
+
+	it("classifies hosted-git prefixes as git", () => {
+		expect(protocolOf("github:u/r")).toBe("git");
+		expect(protocolOf("gist:abc")).toBe("git");
+		expect(protocolOf("bitbucket:u/r")).toBe("git");
+		expect(protocolOf("gitlab:u/r")).toBe("git");
+	});
+
+	it("classifies bare local paths as file", () => {
+		expect(protocolOf("./foo")).toBe("file");
+		expect(protocolOf("../foo")).toBe("file");
+		expect(protocolOf("~/foo")).toBe("file");
+		expect(protocolOf("/abs/p")).toBe("file");
+	});
+
+	it("classifies unrecognized specifiers as unknown", () => {
+		expect(protocolOf("!!garbage")).toBe("unknown");
+		expect(protocolOf("patch:lodash")).toBe("unknown");
+	});
+
 	it("exposes convenience getters", () => {
 		const link = new Dependency({ name: "x", specifier: "link:../l" });
 		expect(link.isLocal).toBe(true);
@@ -94,6 +118,14 @@ describe("Dependency protocol taxonomy", () => {
 		expect(cat.isUnresolved).toBe(true);
 		expect(isUnresolvedDependency(cat)).toBe(true);
 		expect(isUnresolvedDependency(link)).toBe(false);
+
+		const barePath = new Dependency({ name: "x", specifier: "../foo" });
+		expect(barePath.isLocal).toBe(true);
+		expect(barePath.isGit).toBe(false);
+
+		const ghShorthand = new Dependency({ name: "x", specifier: "user/repo" });
+		expect(ghShorthand.isGit).toBe(true);
+		expect(ghShorthand.isLocal).toBe(false);
 	});
 
 	it("parses a semver range via semver-effect", () => {

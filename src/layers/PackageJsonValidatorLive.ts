@@ -23,8 +23,10 @@ const hasDescription: ValidationRule = {
 
 const hasRepository: ValidationRule = {
 	name: "has-repository",
+	// `repository` is currently unmodeled and lives in `rest`; check both the typed
+	// fields and `rest` so the rule still works if it later becomes a modeled field.
 	validate: (pkg) =>
-		Object.hasOwn(pkg.rest, "repository")
+		Object.hasOwn(pkg, "repository") || Object.hasOwn(pkg.rest, "repository")
 			? Effect.void
 			: Effect.fail({ message: "Missing repository field", path: Option.some("repository") }),
 };
