@@ -7,12 +7,14 @@
  * @packageDocumentation
  */
 
+export type {
+	DependencyProtocol,
+	DependencyProtocolGetters,
+	UnresolvedDependency,
+} from "./domain/Dependency.js";
 // Domain
 export {
 	Dependency,
-	type DependencyProtocol,
-	type DependencyProtocolGetters,
-	type UnresolvedDependency,
 	isGitSpecifier,
 	isLocalSpecifier,
 	isRangeSpecifier,
