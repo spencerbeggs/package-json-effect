@@ -1,7 +1,9 @@
 import { Effect, Option } from "effect";
 import { describe, expect, it } from "vitest";
+import { DependencyResolutionError } from "../../src/errors/DependencyResolutionError.js";
 import { InvalidDependencySpecifierError } from "../../src/errors/InvalidDependencySpecifierError.js";
 import { InvalidPackageNameError } from "../../src/errors/InvalidPackageNameError.js";
+import { InvalidSpdxLicenseError } from "../../src/errors/InvalidSpdxLicenseError.js";
 import { PackageJsonDecodeError } from "../../src/errors/PackageJsonDecodeError.js";
 import { PackageJsonNotFoundError } from "../../src/errors/PackageJsonNotFoundError.js";
 import { PackageJsonParseError } from "../../src/errors/PackageJsonParseError.js";
@@ -95,5 +97,23 @@ describe("PackageJsonValidationError", () => {
 		expect(err.failures).toHaveLength(2);
 		expect(err.message).toContain("has-license");
 		expect(err.message).toContain("not-private");
+	});
+});
+
+describe("InvalidSpdxLicenseError", () => {
+	it("has correct _tag and message", () => {
+		const err = new InvalidSpdxLicenseError({ input: "NOPE", reason: "Unknown identifier" });
+		expect(err._tag).toBe("InvalidSpdxLicenseError");
+		expect(err.message).toContain("NOPE");
+		expect(err.message).toContain("Unknown identifier");
+	});
+});
+
+describe("DependencyResolutionError", () => {
+	it("has correct _tag and message", () => {
+		const err = new DependencyResolutionError({ packageName: "foo", specifier: "workspace:*", reason: "not found" });
+		expect(err._tag).toBe("DependencyResolutionError");
+		expect(err.message).toContain("foo");
+		expect(err.message).toContain("workspace:*");
 	});
 });

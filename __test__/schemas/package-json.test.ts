@@ -1,6 +1,6 @@
 import { HashMap, Option, Schema } from "effect";
 import { describe, expect, it } from "vitest";
-import { PackageJsonSchema, makePackageJsonSchema } from "../../src/schemas/package-json.js";
+import { PackageJsonSchema } from "../../src/schemas/package-json.js";
 
 const minimal = { name: "my-pkg", version: "1.0.0" };
 
@@ -74,30 +74,5 @@ describe("PackageJsonSchema", () => {
 
 	it("rejects missing version", () => {
 		expect(() => Schema.decodeUnknownSync(PackageJsonSchema)({ name: "pkg" })).toThrow();
-	});
-});
-
-describe("makePackageJsonSchema", () => {
-	it("creates a schema with overridden fields", () => {
-		const CustomSchema = makePackageJsonSchema({
-			description: Schema.String,
-		});
-		const result = Schema.decodeUnknownSync(CustomSchema)({
-			name: "pkg",
-			version: "1.0.0",
-			description: "required now",
-		});
-		expect(result.description).toBe("required now");
-	});
-
-	it("preserves unknown fields with custom schema", () => {
-		const CustomSchema = makePackageJsonSchema({});
-		const decoded = Schema.decodeUnknownSync(CustomSchema)({
-			name: "pkg",
-			version: "1.0.0",
-			custom: true,
-		});
-		const encoded = Schema.encodeSync(CustomSchema)(decoded);
-		expect(encoded.custom).toBe(true);
 	});
 });

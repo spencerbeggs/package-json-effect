@@ -1,4 +1,4 @@
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Effect } from "effect";
@@ -101,5 +101,24 @@ describe("Round-trip integration", () => {
 		expect(keys.indexOf("version")).toBeLessThan(keys.indexOf("description"));
 		expect(keys.indexOf("license")).toBeLessThan(keys.indexOf("exports"));
 		expect(keys.indexOf("scripts")).toBeLessThan(keys.indexOf("dependencies"));
+	});
+
+	it("preserves unknown fields and workspace: specifiers on write (default no-op resolvers)", async () => {
+		const srcPath = join(tempDir, "src-package.json");
+		const outPath = join(tempDir, "out-package.json");
+		writeFileSync(
+			srcPath,
+			JSON.stringify({ name: "p", version: "1.0.0", customX: "preserved", dependencies: { lib: "workspace:*" } }),
+		);
+		const written = await Effect.gen(function* () {
+			const reader = yield* PackageJsonReader;
+			const writer = yield* PackageJsonWriter;
+			const pkg = yield* reader.read(srcPath);
+			yield* writer.write(outPath, pkg);
+			return JSON.parse(readFileSync(outPath, "utf-8"));
+		}).pipe(Effect.provide(TestLayer), Effect.runPromise);
+
+		expect(written.customX).toBe("preserved");
+		expect(written.dependencies.lib).toBe("workspace:*");
 	});
 });

@@ -1,14 +1,19 @@
-import type { Effect } from "effect";
+import type { Effect, Option } from "effect";
 import { Context } from "effect";
 import type { Package } from "../domain/Package.js";
 import type { PackageJsonValidationError } from "../errors/PackageJsonValidationError.js";
+
+export interface RuleFailure {
+	readonly message: string;
+	readonly path?: Option.Option<string>;
+}
 
 /**
  * A single validation rule.
  */
 export interface ValidationRule {
 	readonly name: string;
-	readonly validate: (pkg: Package) => Effect.Effect<void, { readonly message: string }>;
+	readonly validate: (pkg: Package) => Effect.Effect<void, RuleFailure>;
 }
 
 /**

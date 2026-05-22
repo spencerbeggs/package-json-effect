@@ -1,4 +1,4 @@
-import { Effect } from "effect";
+import { Effect, Option } from "effect";
 import { describe, expect, it } from "vitest";
 import { CatalogResolverLive } from "../../src/layers/CatalogResolverLive.js";
 import { PackageJsonTransformerLive } from "../../src/layers/PackageJsonTransformerLive.js";
@@ -8,28 +8,36 @@ import { PackageJsonTransformer } from "../../src/services/PackageJsonTransforme
 import { WorkspaceResolver } from "../../src/services/WorkspaceResolver.js";
 
 describe("CatalogResolverLive", () => {
-	it("passes through unchanged (no-op)", async () => {
-		const input = { name: "pkg", dependencies: { foo: "catalog:silk" } };
+	it("returns None for any package (no-op)", async () => {
 		const result = await Effect.runPromise(
 			Effect.gen(function* () {
 				const resolver = yield* CatalogResolver;
-				return yield* resolver.resolve(input);
+				return yield* resolver.rangeOf("foo", Option.none());
 			}).pipe(Effect.provide(CatalogResolverLive)),
 		);
-		expect(result).toEqual(input);
+		expect(Option.isNone(result)).toBe(true);
+	});
+
+	it("returns None for named catalog (no-op)", async () => {
+		const result = await Effect.runPromise(
+			Effect.gen(function* () {
+				const resolver = yield* CatalogResolver;
+				return yield* resolver.rangeOf("foo", Option.some("silk"));
+			}).pipe(Effect.provide(CatalogResolverLive)),
+		);
+		expect(Option.isNone(result)).toBe(true);
 	});
 });
 
 describe("WorkspaceResolverLive", () => {
-	it("passes through unchanged (no-op)", async () => {
-		const input = { name: "pkg", dependencies: { bar: "workspace:*" } };
+	it("returns None for any package (no-op)", async () => {
 		const result = await Effect.runPromise(
 			Effect.gen(function* () {
 				const resolver = yield* WorkspaceResolver;
-				return yield* resolver.resolve(input);
+				return yield* resolver.versionOf("bar");
 			}).pipe(Effect.provide(WorkspaceResolverLive)),
 		);
-		expect(result).toEqual(input);
+		expect(Option.isNone(result)).toBe(true);
 	});
 });
 

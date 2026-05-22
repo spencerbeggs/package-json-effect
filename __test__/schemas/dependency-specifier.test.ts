@@ -1,6 +1,6 @@
-import { Schema } from "effect";
+import { Effect, Schema } from "effect";
 import { describe, expect, it } from "vitest";
-import { DependencySpecifier } from "../../src/schemas/dependency-specifier.js";
+import { DependencySpecifier, decodeSpecifier } from "../../src/schemas/dependency-specifier.js";
 
 describe("DependencySpecifier schema", () => {
 	it("accepts semver ranges", () => {
@@ -32,6 +32,18 @@ describe("DependencySpecifier schema", () => {
 		);
 	});
 
+	it("accepts hosted-git prefixes", () => {
+		expect(Schema.decodeUnknownSync(DependencySpecifier)("github:u/r")).toBe("github:u/r");
+		expect(Schema.decodeUnknownSync(DependencySpecifier)("gist:abc")).toBe("gist:abc");
+		expect(Schema.decodeUnknownSync(DependencySpecifier)("bitbucket:u/r")).toBe("bitbucket:u/r");
+		expect(Schema.decodeUnknownSync(DependencySpecifier)("gitlab:u/r")).toBe("gitlab:u/r");
+	});
+
+	it("rejects unrecognized specifiers", () => {
+		expect(() => Schema.decodeUnknownSync(DependencySpecifier)("!!garbage")).toThrow();
+		expect(() => Schema.decodeUnknownSync(DependencySpecifier)("patch:lodash")).toThrow();
+	});
+
 	it("accepts GitHub shorthand", () => {
 		expect(Schema.decodeUnknownSync(DependencySpecifier)("user/repo")).toBe("user/repo");
 		expect(Schema.decodeUnknownSync(DependencySpecifier)("user/repo#branch")).toBe("user/repo#branch");
@@ -55,5 +67,25 @@ describe("DependencySpecifier schema", () => {
 
 	it("rejects empty string", () => {
 		expect(() => Schema.decodeUnknownSync(DependencySpecifier)("")).toThrow();
+	});
+});
+
+describe("decodeSpecifier", () => {
+	it("returns the branded value for a valid specifier", () => {
+		const result = Effect.runSync(decodeSpecifier("^1.0.0"));
+		expect(result).toBe("^1.0.0");
+	});
+
+	it("fails with InvalidDependencySpecifierError for an empty string", () => {
+		const exit = Effect.runSyncExit(decodeSpecifier(""));
+		expect(exit._tag).toBe("Failure");
+		if (exit._tag === "Failure") {
+			const cause = exit.cause;
+			if (cause._tag === "Fail") {
+				expect(cause.error._tag).toBe("InvalidDependencySpecifierError");
+			} else {
+				throw new Error("Expected Fail cause");
+			}
+		}
 	});
 });
