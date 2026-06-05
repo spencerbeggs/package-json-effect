@@ -30,7 +30,7 @@ pnpm install
 ## Code quality
 
 Linting and formatting are handled by [Biome](https://biomejs.dev/). The configuration
-extends `@savvy-web/lint-staged/biome/silk.jsonc`. Biome runs automatically on staged
+extends `@savvy-web/silk/biome`. Biome runs automatically on staged
 files before each commit via Husky and lint-staged.
 
 Tests use [Vitest](https://vitest.dev/) with the `forks` pool and v8 coverage. Build
