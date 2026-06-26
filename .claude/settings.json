@@ -1,7 +1,4 @@
 {
-	"env": {
-		"ENABLE_LSP_TOOL": "1"
-	},
 	"permissions": {
 		"allow": [
 			"Write(./**)",
@@ -16,8 +13,7 @@
 	"enabledPlugins": {
 		"silk@savvy-web-systems": true,
 		"design-docs@spencerbeggs": true,
-		"vitest@savvy-web-systems": true,
-		"typescript-lsp@claude-plugins-official": true
+		"vitest-agent@spencerbeggs": true
 	},
 	"plansDirectory": ".claude/plans"
 }
