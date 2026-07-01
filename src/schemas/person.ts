@@ -2,6 +2,8 @@ import { Schema } from "effect";
 
 /**
  * Structured person object with name, optional email and url.
+ *
+ * @public
  */
 export class Person extends Schema.Class<Person>("Person")({
 	name: Schema.String,
@@ -37,5 +39,7 @@ const PersonFromString = Schema.transform(Schema.String, Schema.typeSchema(Perso
  * Person field: either a string "Name email (url)" shorthand or a
  * structured object with name, email, and url fields.
  * Always decoded to the object form.
+ *
+ * @public
  */
 export const PersonSchema = Schema.Union(Person, PersonFromString);

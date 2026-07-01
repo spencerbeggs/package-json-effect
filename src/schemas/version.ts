@@ -4,6 +4,8 @@ import { SemVer, parseValidSemVer } from "semver-effect";
 /**
  * Schema that decodes a version string into a SemVer instance
  * and encodes it back to a string. Uses semver-effect for parsing.
+ *
+ * @public
  */
 export const VersionSchema: Schema.Schema<SemVer, string> = Schema.transformOrFail(
 	Schema.String,

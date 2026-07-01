@@ -8,12 +8,14 @@ import { Data } from "effect";
  * accessible when {@link PackageJsonWriteError} appears in public type signatures.
  * Consumers should use {@link PackageJsonWriteError} directly.
  *
- * @internal
+ * @public
  */
 export const PackageJsonWriteErrorBase = Data.TaggedError("PackageJsonWriteError");
 
 /**
  * Indicates that a package.json file could not be written to the filesystem.
+ *
+ * @public
  */
 export class PackageJsonWriteError extends PackageJsonWriteErrorBase<{
 	/** The file path or target location that could not be written. */

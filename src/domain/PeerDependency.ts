@@ -10,6 +10,11 @@ import {
 	protocolOf,
 } from "./Dependency.js";
 
+/**
+ * A `peerDependencies` entry pairing a package name, version specifier, and optionality flag.
+ *
+ * @public
+ */
 export class PeerDependency
 	extends Schema.TaggedClass<PeerDependency>()("PeerDependency", {
 		name: Schema.String,

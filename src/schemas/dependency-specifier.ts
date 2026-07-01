@@ -6,6 +6,8 @@ import { InvalidDependencySpecifierError } from "../errors/InvalidDependencySpec
  *
  * Accepts semver ranges, exact versions, dist-tags, URLs,
  * git refs, GitHub shorthand, file paths, and npm/catalog/workspace protocols.
+ *
+ * @public
  */
 export const isValidDependencySpecifier = (s: string): boolean => {
 	if (s.length === 0) return false;
@@ -34,18 +36,26 @@ export const isValidDependencySpecifier = (s: string): boolean => {
 
 /**
  * A valid dependency version specifier.
+ *
+ * @public
  */
 export const DependencySpecifier = Schema.String.pipe(
 	Schema.filter((s) => isValidDependencySpecifier(s) || "Expected a valid dependency specifier"),
 	Schema.brand("DependencySpecifier"),
 );
 
-/** Branded type for dependency specifiers. */
+/**
+ * Branded type for dependency specifiers.
+ *
+ * @public
+ */
 export type DependencySpecifier = Schema.Schema.Type<typeof DependencySpecifier>;
 
 /**
  * Opt-in decoder: validate a string as a DependencySpecifier, failing with a
  * typed InvalidDependencySpecifierError instead of a Schema ParseError.
+ *
+ * @public
  */
 export const decodeSpecifier = (input: string): Effect.Effect<DependencySpecifier, InvalidDependencySpecifierError> =>
 	Schema.decodeUnknown(DependencySpecifier)(input).pipe(

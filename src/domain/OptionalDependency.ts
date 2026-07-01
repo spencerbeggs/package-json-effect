@@ -10,6 +10,11 @@ import {
 	protocolOf,
 } from "./Dependency.js";
 
+/**
+ * An `optionalDependencies` entry pairing a package name with its version specifier.
+ *
+ * @public
+ */
 export class OptionalDependency
 	extends Schema.TaggedClass<OptionalDependency>()("OptionalDependency", {
 		name: Schema.String,

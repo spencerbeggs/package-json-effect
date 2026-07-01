@@ -15,11 +15,17 @@ const isValidSpdx = (s: string): boolean => {
 /**
  * A valid SPDX license identifier, expression, "UNLICENSED",
  * or "SEE LICENSE IN filename".
+ *
+ * @public
  */
 export const SpdxLicense = Schema.String.pipe(
 	Schema.filter((s) => isValidSpdx(s) || "Expected a valid SPDX license identifier or expression"),
 	Schema.brand("SpdxLicense"),
 );
 
-/** Branded type for SPDX license strings. */
+/**
+ * Branded type for SPDX license strings.
+ *
+ * @public
+ */
 export type SpdxLicense = Schema.Schema.Type<typeof SpdxLicense>;

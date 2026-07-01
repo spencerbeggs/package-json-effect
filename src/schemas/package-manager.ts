@@ -1,5 +1,10 @@
 import { Option, ParseResult, Schema } from "effect";
 
+/**
+ * Structured packageManager value with name, version, and optional integrity.
+ *
+ * @public
+ */
 export class PackageManager extends Schema.Class<PackageManager>("PackageManager")({
 	name: Schema.String,
 	version: Schema.String,
@@ -16,6 +21,8 @@ const PACKAGE_MANAGER_REGEX = /^([a-z]+)@(\d+\.\d+\.\d+(?:-[a-zA-Z0-9._-]+)?)(?:
  * Parses a packageManager string (e.g. "pnpm\@10.33.0+sha512.abc")
  * into a PackageManager class instance with name, version, and
  * optional integrity fields.
+ *
+ * @public
  */
 export const PackageManagerSchema: Schema.Schema<PackageManager, string> = Schema.transformOrFail(
 	Schema.String,

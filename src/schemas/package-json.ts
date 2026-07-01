@@ -13,6 +13,8 @@ const RawJson = Schema.Record({ key: Schema.String, value: Schema.Unknown });
  * Effect the class's encoded shape so the class decodes itself. On encode it
  * receives the class's encoded shape and flattens the literal `rest` key back
  * into top-level fields, so the on-disk shape never contains a `rest` key.
+ *
+ * @public
  */
 export const makePackageJsonSchema = <Self extends Package>(
 	// biome-ignore lint/suspicious/noExplicitAny: invariant Schema Encoded slot — a generic I infers to unknown and is rejected by tsc
@@ -39,13 +41,25 @@ export const makePackageJsonSchema = <Self extends Package>(
 	return wire as unknown as Schema.Schema<Self, { readonly [k: string]: unknown }, never>;
 };
 
-/** The default wire schema: decodes JSON to a Package instance and back. */
+/**
+ * The default wire schema: decodes JSON to a Package instance and back.
+ *
+ * @public
+ */
 export const PackageJsonSchema = makePackageJsonSchema(Package);
 
-/** Decoded type for PackageJsonSchema. */
+/**
+ * Decoded type for PackageJsonSchema.
+ *
+ * @public
+ */
 export type PackageJsonSchemaType = Package;
 
-/** Encoded (plain JSON) type for PackageJsonSchema. */
+/**
+ * Encoded (plain JSON) type for PackageJsonSchema.
+ *
+ * @public
+ */
 export interface PackageJsonSchemaEncoded {
 	readonly [k: string]: unknown;
 }

@@ -10,6 +10,8 @@ import { WorkspaceResolverLive } from "./WorkspaceResolverLive.js";
 /**
  * Composite layer providing all package-json-effect services.
  * Requires \@effect/platform FileSystem to be provided by the consumer.
+ *
+ * @public
  */
 export const PackageJsonLive = Layer.mergeAll(
 	PackageJsonReaderLive,

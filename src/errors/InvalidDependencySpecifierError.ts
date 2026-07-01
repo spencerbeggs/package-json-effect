@@ -8,12 +8,14 @@ import { Data } from "effect";
  * accessible when {@link InvalidDependencySpecifierError} appears in public type signatures.
  * Consumers should use {@link InvalidDependencySpecifierError} directly.
  *
- * @internal
+ * @public
  */
 export const InvalidDependencySpecifierErrorBase = Data.TaggedError("InvalidDependencySpecifierError");
 
 /**
  * Indicates that a string could not be parsed as a valid dependency specifier.
+ *
+ * @public
  */
 export class InvalidDependencySpecifierError extends InvalidDependencySpecifierErrorBase<{
 	/** The raw input string that failed validation. */

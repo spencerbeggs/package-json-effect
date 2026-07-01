@@ -7,6 +7,12 @@ import { PackageJsonReadError } from "../errors/PackageJsonReadError.js";
 import { PackageJsonSchema } from "../schemas/package-json.js";
 import { PackageJsonReader } from "../services/PackageJsonReader.js";
 
+/**
+ * Live Layer providing the PackageJsonReader service backed by \@effect/platform
+ * FileSystem.
+ *
+ * @public
+ */
 export const PackageJsonReaderLive: Layer.Layer<PackageJsonReader, never, FileSystem.FileSystem> = Layer.effect(
 	PackageJsonReader,
 	Effect.gen(function* () {

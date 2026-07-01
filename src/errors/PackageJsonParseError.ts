@@ -8,12 +8,14 @@ import { Data, Option } from "effect";
  * accessible when {@link PackageJsonParseError} appears in public type signatures.
  * Consumers should use {@link PackageJsonParseError} directly.
  *
- * @internal
+ * @public
  */
 export const PackageJsonParseErrorBase = Data.TaggedError("PackageJsonParseError");
 
 /**
  * Indicates that a string could not be parsed as valid JSON for a package.json file.
+ *
+ * @public
  */
 export class PackageJsonParseError extends PackageJsonParseErrorBase<{
 	/** The raw input string that failed to parse. */

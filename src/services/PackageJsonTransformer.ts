@@ -4,6 +4,8 @@ import { Context } from "effect";
 /**
  * Service for transforming the encoded package.json object before formatting.
  * Default implementation removes empty dependency map fields.
+ *
+ * @public
  */
 export class PackageJsonTransformer extends Context.Tag("package-json-effect/PackageJsonTransformer")<
 	PackageJsonTransformer,

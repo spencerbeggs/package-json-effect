@@ -8,6 +8,8 @@ import type { PackageJsonReadError } from "../errors/PackageJsonReadError.js";
 
 /**
  * Service for reading and parsing package.json from a source.
+ *
+ * @public
  */
 export class PackageJsonReader extends Context.Tag("package-json-effect/PackageJsonReader")<
 	PackageJsonReader,

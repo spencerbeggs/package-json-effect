@@ -8,12 +8,14 @@ import { Data } from "effect";
  * accessible when {@link PackageJsonReadError} appears in public type signatures.
  * Consumers should use {@link PackageJsonReadError} directly.
  *
- * @internal
+ * @public
  */
 export const PackageJsonReadErrorBase = Data.TaggedError("PackageJsonReadError");
 
 /**
  * Indicates that a package.json file could not be read from the filesystem.
+ *
+ * @public
  */
 export class PackageJsonReadError extends PackageJsonReadErrorBase<{
 	/** The file path or source location that could not be read. */

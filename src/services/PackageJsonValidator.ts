@@ -3,6 +3,11 @@ import { Context } from "effect";
 import type { Package } from "../domain/Package.js";
 import type { PackageJsonValidationError } from "../errors/PackageJsonValidationError.js";
 
+/**
+ * A single validation rule failure.
+ *
+ * @public
+ */
 export interface RuleFailure {
 	readonly message: string;
 	readonly path?: Option.Option<string>;
@@ -10,6 +15,8 @@ export interface RuleFailure {
 
 /**
  * A single validation rule.
+ *
+ * @public
  */
 export interface ValidationRule {
 	readonly name: string;
@@ -18,6 +25,8 @@ export interface ValidationRule {
 
 /**
  * Service for validating a Package against a set of rules.
+ *
+ * @public
  */
 export class PackageJsonValidator extends Context.Tag("package-json-effect/PackageJsonValidator")<
 	PackageJsonValidator,

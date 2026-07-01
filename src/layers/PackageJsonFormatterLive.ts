@@ -86,6 +86,12 @@ const sortKeys = (obj: Record<string, unknown>): Record<string, unknown> => {
 	return result;
 };
 
+/**
+ * Live Layer providing the PackageJsonFormatter service, which orders top-level
+ * keys canonically and alphabetizes dependency maps.
+ *
+ * @public
+ */
 export const PackageJsonFormatterLive: Layer.Layer<PackageJsonFormatter> = Layer.succeed(
 	PackageJsonFormatter,
 	PackageJsonFormatter.of({

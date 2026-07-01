@@ -44,6 +44,8 @@ const catalogName = (specifier: string): Option.Option<string> => {
  * known fields plus a `rest` catch-all that preserves any unmodeled top-level
  * fields for round-trip fidelity. The literal `rest` key is flattened away by
  * the wire transform in src/schemas/package-json.ts.
+ *
+ * @public
  */
 export class Package extends Schema.Class<Package>("Package")({
 	name: PackageName,

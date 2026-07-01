@@ -9,6 +9,12 @@ import { PackageJsonTransformer } from "../services/PackageJsonTransformer.js";
 import { PackageJsonWriter } from "../services/PackageJsonWriter.js";
 import { WorkspaceResolver } from "../services/WorkspaceResolver.js";
 
+/**
+ * Live Layer providing the PackageJsonWriter service, which resolves
+ * catalog:/workspace: protocols, transforms, formats, and writes package.json.
+ *
+ * @public
+ */
 export const PackageJsonWriterLive: Layer.Layer<
 	PackageJsonWriter,
 	never,
