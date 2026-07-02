@@ -10,6 +10,11 @@ import {
 	protocolOf,
 } from "./Dependency.js";
 
+/**
+ * A `devDependencies` entry pairing a package name with its version specifier.
+ *
+ * @public
+ */
 export class DevDependency
 	extends Schema.TaggedClass<DevDependency>()("DevDependency", {
 		name: Schema.String,

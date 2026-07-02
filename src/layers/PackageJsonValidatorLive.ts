@@ -42,6 +42,12 @@ const anyDepMatches = (pkg: Package, pred: (specifier: string) => boolean): bool
 	return maps.some((m) => Array.from(HashMap.values(m)).some(pred));
 };
 
+/**
+ * Validation rule that fails when any dependency uses an unresolved
+ * workspace: or catalog: specifier.
+ *
+ * @public
+ */
 export const noUnresolvedDepsRule: ValidationRule = {
 	name: "no-unresolved-deps",
 	validate: (pkg) =>
@@ -50,6 +56,12 @@ export const noUnresolvedDepsRule: ValidationRule = {
 			: Effect.void,
 };
 
+/**
+ * Validation rule that fails when any dependency uses a local
+ * file:, link:, or portal: specifier.
+ *
+ * @public
+ */
 export const noLocalDepsRule: ValidationRule = {
 	name: "no-local-deps",
 	validate: (pkg) =>
@@ -58,6 +70,12 @@ export const noLocalDepsRule: ValidationRule = {
 			: Effect.void,
 };
 
+/**
+ * Default set of validation rules: license, description, repository, and
+ * not-private checks.
+ *
+ * @public
+ */
 export const defaultRules: ReadonlyArray<ValidationRule> = [hasLicense, hasDescription, hasRepository, notPrivate];
 
 const runRules = (pkg: Package, rules: ReadonlyArray<ValidationRule>) =>
@@ -80,11 +98,22 @@ const runRules = (pkg: Package, rules: ReadonlyArray<ValidationRule>) =>
 		return pkg;
 	});
 
+/**
+ * Live Layer providing the PackageJsonValidator service backed by the
+ * default rule set.
+ *
+ * @public
+ */
 export const PackageJsonValidatorLive: Layer.Layer<PackageJsonValidator> = Layer.succeed(
 	PackageJsonValidator,
 	PackageJsonValidator.of({ validate: (pkg) => runRules(pkg, defaultRules) }),
 );
 
+/**
+ * Builds a PackageJsonValidator Layer from a custom set of validation rules.
+ *
+ * @public
+ */
 export const makePackageJsonValidatorLive = (config: {
 	rules: ReadonlyArray<ValidationRule>;
 }): Layer.Layer<PackageJsonValidator> =>

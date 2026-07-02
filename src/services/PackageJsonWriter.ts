@@ -5,6 +5,8 @@ import type { PackageJsonWriteError } from "../errors/PackageJsonWriteError.js";
 
 /**
  * Service for writing package.json to a target.
+ *
+ * @public
  */
 export class PackageJsonWriter extends Context.Tag("package-json-effect/PackageJsonWriter")<
 	PackageJsonWriter,

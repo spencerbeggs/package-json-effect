@@ -17,6 +17,8 @@ const stripEmptyDependencyMaps = (raw: Record<string, unknown>): Record<string, 
 /**
  * Default PackageJsonTransformer: removes empty dependency map fields.
  * Replace or compose with custom transformers for additional processing.
+ *
+ * @public
  */
 export const PackageJsonTransformerLive: Layer.Layer<PackageJsonTransformer> = Layer.succeed(
 	PackageJsonTransformer,

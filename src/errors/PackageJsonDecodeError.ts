@@ -8,12 +8,14 @@ import { Data } from "effect";
  * accessible when {@link PackageJsonDecodeError} appears in public type signatures.
  * Consumers should use {@link PackageJsonDecodeError} directly.
  *
- * @internal
+ * @public
  */
 export const PackageJsonDecodeErrorBase = Data.TaggedError("PackageJsonDecodeError");
 
 /**
  * Indicates that a parsed JSON value could not be decoded into a valid PackageJson structure.
+ *
+ * @public
  */
 export class PackageJsonDecodeError extends PackageJsonDecodeErrorBase<{
 	/** The raw value that failed to decode. */

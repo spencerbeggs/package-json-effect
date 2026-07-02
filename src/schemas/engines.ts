@@ -2,6 +2,8 @@ import { HashMap, Schema } from "effect";
 
 /**
  * Engines field: map of engine names to semver ranges.
+ *
+ * @public
  */
 export const EnginesSchema: Schema.Schema<
 	HashMap.HashMap<string, string>,

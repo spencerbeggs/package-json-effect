@@ -8,11 +8,15 @@ import { Data } from "effect";
  * accessible when {@link InvalidSpdxLicenseError} appears in public type signatures.
  * Consumers should use {@link InvalidSpdxLicenseError} directly.
  *
- * @internal
+ * @public
  */
 export const InvalidSpdxLicenseErrorBase = Data.TaggedError("InvalidSpdxLicenseError");
 
-/** Indicates that a string is not a valid SPDX license identifier or expression. */
+/**
+ * Indicates that a string is not a valid SPDX license identifier or expression.
+ *
+ * @public
+ */
 export class InvalidSpdxLicenseError extends InvalidSpdxLicenseErrorBase<{
 	/** The raw input string that failed validation. */
 	readonly input: string;

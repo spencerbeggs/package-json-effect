@@ -2,6 +2,8 @@ import { Option } from "effect";
 
 /**
  * Utility functions for working with package name strings.
+ *
+ * @public
  */
 export const PackageNameUtil = {
 	scope: (name: string): Option.Option<string> => {

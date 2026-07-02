@@ -5,6 +5,8 @@ import { Schema } from "effect";
  *
  * Rules: max 214 chars, lowercase, URL-safe characters only,
  * cannot start with . or _ (unless scoped).
+ *
+ * @public
  */
 export const isValidPackageName = (s: string): boolean => {
 	if (s.length === 0 || s.length > 214) return false;
@@ -24,30 +26,48 @@ const isValidNameChars = (s: string): boolean => /^[a-z0-9._-]+$/.test(s);
 
 /**
  * A valid npm scoped package name (starts with \@scope/).
+ *
+ * @public
  */
 export const ScopedPackageName = Schema.String.pipe(
 	Schema.filter((s) => (s.startsWith("@") && isValidPackageName(s)) || "Expected a scoped package name (@scope/name)"),
 	Schema.brand("ScopedPackageName"),
 );
 
-/** Branded type for scoped package names. */
+/**
+ * Branded type for scoped package names.
+ *
+ * @public
+ */
 export type ScopedPackageName = Schema.Schema.Type<typeof ScopedPackageName>;
 
 /**
  * A valid npm unscoped package name (does not start with \@).
+ *
+ * @public
  */
 export const UnscopedPackageName = Schema.String.pipe(
 	Schema.filter((s) => (!s.startsWith("@") && isValidPackageName(s)) || "Expected an unscoped package name"),
 	Schema.brand("UnscopedPackageName"),
 );
 
-/** Branded type for unscoped package names. */
+/**
+ * Branded type for unscoped package names.
+ *
+ * @public
+ */
 export type UnscopedPackageName = Schema.Schema.Type<typeof UnscopedPackageName>;
 
 /**
  * A valid npm package name, either scoped or unscoped.
+ *
+ * @public
  */
 export const PackageName = Schema.Union(ScopedPackageName, UnscopedPackageName);
 
-/** Branded type for any valid package name. */
+/**
+ * Branded type for any valid package name.
+ *
+ * @public
+ */
 export type PackageName = Schema.Schema.Type<typeof PackageName>;

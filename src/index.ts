@@ -60,9 +60,11 @@ export {
 } from "./layers/PackageJsonValidatorLive.js";
 export { PackageJsonWriterLive } from "./layers/PackageJsonWriterLive.js";
 export { WorkspaceResolverLive } from "./layers/WorkspaceResolverLive.js";
-
+// Schema classes referenced by domain signatures
+export { DevEngine } from "./schemas/dev-engines.js";
 // Re-export branded TS types referenced by domain signatures
 export type { PackageName, ScopedPackageName, UnscopedPackageName } from "./schemas/name.js";
+export { PackageManager } from "./schemas/package-manager.js";
 
 // Services
 export { CatalogResolver } from "./services/CatalogResolver.js";

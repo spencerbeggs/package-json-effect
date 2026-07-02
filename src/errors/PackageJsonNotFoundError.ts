@@ -8,12 +8,14 @@ import { Data } from "effect";
  * accessible when {@link PackageJsonNotFoundError} appears in public type signatures.
  * Consumers should use {@link PackageJsonNotFoundError} directly.
  *
- * @internal
+ * @public
  */
 export const PackageJsonNotFoundErrorBase = Data.TaggedError("PackageJsonNotFoundError");
 
 /**
  * Indicates that a package.json file was not found at the expected location.
+ *
+ * @public
  */
 export class PackageJsonNotFoundError extends PackageJsonNotFoundErrorBase<{
 	/** The file path or location where package.json was expected but not found. */

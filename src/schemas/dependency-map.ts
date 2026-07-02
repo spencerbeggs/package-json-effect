@@ -4,6 +4,8 @@ const StringRecord = Schema.Record({ key: Schema.String, value: Schema.String })
 
 /**
  * A dependency map: plain JSON object decoded to/from HashMap.
+ *
+ * @public
  */
 export const DependencyMapSchema: Schema.Schema<
 	HashMap.HashMap<string, string>,

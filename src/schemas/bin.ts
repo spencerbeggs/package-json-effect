@@ -12,6 +12,8 @@ const BinMapSchema: Schema.Schema<HashMap.HashMap<string, string>, { readonly [x
 
 /**
  * Bin field: either a single string path or a map of command names to paths.
+ *
+ * @public
  */
 export const BinSchema: Schema.Schema<
 	string | HashMap.HashMap<string, string>,

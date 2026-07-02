@@ -2,6 +2,11 @@ import { Effect, Option, Schema } from "effect";
 import type { Range } from "semver-effect";
 import { parseRange } from "semver-effect";
 
+/**
+ * The classification of a dependency specifier's protocol.
+ *
+ * @public
+ */
 export type DependencyProtocol =
 	| "range"
 	| "tag"
@@ -15,7 +20,11 @@ export type DependencyProtocol =
 	| "workspace"
 	| "unknown";
 
-/** The shared protocol-classification getters implemented by every Dependency variant. */
+/**
+ * The shared protocol-classification getters implemented by every Dependency variant.
+ *
+ * @public
+ */
 export interface DependencyProtocolGetters {
 	readonly protocol: Option.Option<DependencyProtocol>;
 	readonly range: Option.Option<Range>;
@@ -33,7 +42,11 @@ export interface DependencyProtocolGetters {
 const isBarePath = (s: string): boolean =>
 	s.startsWith("./") || s.startsWith("../") || s.startsWith("~/") || s.startsWith("/");
 
-/** Returns true if the specifier points to a local path (file:, link:, portal:, or a bare path). */
+/**
+ * Returns true if the specifier points to a local path (file:, link:, portal:, or a bare path).
+ *
+ * @public
+ */
 export const isLocalSpecifier = (s: string): boolean =>
 	s.startsWith("file:") || s.startsWith("link:") || s.startsWith("portal:") || isBarePath(s);
 
@@ -41,7 +54,11 @@ export const isLocalSpecifier = (s: string): boolean =>
 const isGitHubShorthand = (s: string): boolean =>
 	!s.startsWith(".") && !s.startsWith("~") && !s.startsWith("/") && /^[a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+(#.*)?$/.test(s);
 
-/** Returns true if the specifier resolves to a git source (git URLs and hosted-git shorthands). */
+/**
+ * Returns true if the specifier resolves to a git source (git URLs and hosted-git shorthands).
+ *
+ * @public
+ */
 export const isGitSpecifier = (s: string): boolean =>
 	s.startsWith("git+") ||
 	s.startsWith("git://") ||
@@ -51,16 +68,32 @@ export const isGitSpecifier = (s: string): boolean =>
 	s.startsWith("gitlab:") ||
 	isGitHubShorthand(s);
 
-/** Returns true if the specifier is a parseable semver range. */
+/**
+ * Returns true if the specifier is a parseable semver range.
+ *
+ * @public
+ */
 export const isRangeSpecifier = (s: string): boolean => Option.isSome(parseRangeOption(s));
 
-/** Returns true if the specifier is a dist-tag (e.g. "latest", "next"). */
+/**
+ * Returns true if the specifier is a dist-tag (e.g. "latest", "next").
+ *
+ * @public
+ */
 export const isTagSpecifier = (s: string): boolean => protocolOf(s) === "tag";
 
-/** Parse the specifier as a semver Range, returning None when it is not a range. */
+/**
+ * Parse the specifier as a semver Range, returning None when it is not a range.
+ *
+ * @public
+ */
 export const parseRangeOption = (s: string): Option.Option<Range> => Effect.runSync(Effect.option(parseRange(s)));
 
-/** Classify a specifier string into a single protocol; "unknown" for unrecognized input. */
+/**
+ * Classify a specifier string into a single protocol; "unknown" for unrecognized input.
+ *
+ * @public
+ */
 export const protocolOf = (s: string): DependencyProtocol => {
 	if (s.startsWith("catalog:")) return "catalog";
 	if (s.startsWith("workspace:")) return "workspace";
@@ -75,6 +108,11 @@ export const protocolOf = (s: string): DependencyProtocol => {
 	return "unknown";
 };
 
+/**
+ * A resolved dependency entry pairing a package name with its version specifier.
+ *
+ * @public
+ */
 export class Dependency
 	extends Schema.TaggedClass<Dependency>()("Dependency", {
 		name: Schema.String,
@@ -117,10 +155,18 @@ export class Dependency
 	}
 }
 
-/** A Dependency whose specifier is an unresolved catalog: or workspace: protocol. */
+/**
+ * A Dependency whose specifier is an unresolved catalog: or workspace: protocol.
+ *
+ * @public
+ */
 export type UnresolvedDependency = Dependency & { readonly isUnresolved: true };
 
-/** Type guard narrowing any dependency-like value to UnresolvedDependency, preserving the concrete type. */
+/**
+ * Type guard narrowing any dependency-like value to UnresolvedDependency, preserving the concrete type.
+ *
+ * @public
+ */
 export const isUnresolvedDependency = <T extends { readonly isUnresolved: boolean }>(
 	dep: T,
 ): dep is T & { readonly isUnresolved: true } => dep.isUnresolved === true;

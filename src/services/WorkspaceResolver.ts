@@ -6,6 +6,8 @@ import type { DependencyResolutionError } from "../errors/DependencyResolutionEr
  * Resolves workspace: protocol specifiers. Given a workspace package name,
  * returns its concrete version (without range modifier), or None if it cannot
  * be resolved (default no-op behavior).
+ *
+ * @public
  */
 export class WorkspaceResolver extends Context.Tag("package-json-effect/WorkspaceResolver")<
 	WorkspaceResolver,

@@ -2,6 +2,8 @@ import { Data, Option } from "effect";
 
 /**
  * Describes a single rule failure during package.json validation.
+ *
+ * @public
  */
 export interface ValidationRuleFailure {
 	/** The identifier of the validation rule that failed. */
@@ -20,12 +22,14 @@ export interface ValidationRuleFailure {
  * accessible when {@link PackageJsonValidationError} appears in public type signatures.
  * Consumers should use {@link PackageJsonValidationError} directly.
  *
- * @internal
+ * @public
  */
 export const PackageJsonValidationErrorBase = Data.TaggedError("PackageJsonValidationError");
 
 /**
  * Indicates that a package.json file failed one or more validation rules.
+ *
+ * @public
  */
 export class PackageJsonValidationError extends PackageJsonValidationErrorBase<{
 	/** The list of rule failures encountered during validation. */

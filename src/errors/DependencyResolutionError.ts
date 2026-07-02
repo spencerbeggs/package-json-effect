@@ -8,11 +8,15 @@ import { Data } from "effect";
  * accessible when {@link DependencyResolutionError} appears in public type signatures.
  * Consumers should use {@link DependencyResolutionError} directly.
  *
- * @internal
+ * @public
  */
 export const DependencyResolutionErrorBase = Data.TaggedError("DependencyResolutionError");
 
-/** Indicates that a catalog: or workspace: specifier could not be resolved. */
+/**
+ * Indicates that a catalog: or workspace: specifier could not be resolved.
+ *
+ * @public
+ */
 export class DependencyResolutionError extends DependencyResolutionErrorBase<{
 	/** The name of the package whose specifier could not be resolved. */
 	readonly packageName: string;

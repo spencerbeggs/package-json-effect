@@ -11,7 +11,14 @@ const ExportsObject = Schema.Record({
  *
  * The object form accepts any value shape to support conditional
  * exports with nested objects (e.g. `{ "import": "./esm.js", "require": "./cjs.js" }`).
+ *
+ * @public
  */
 export const ExportsFieldSchema = Schema.Union(Schema.String, ExportsObject);
 
+/**
+ * Decoded type for the exports field.
+ *
+ * @public
+ */
 export type ExportsField = Schema.Schema.Type<typeof ExportsFieldSchema>;

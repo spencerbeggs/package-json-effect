@@ -3,6 +3,8 @@ import { Context } from "effect";
 /**
  * Service for formatting/sorting a raw package.json object before serialization.
  * Operates on the encoded JSON object (post Schema.encode), not the domain model.
+ *
+ * @public
  */
 export class PackageJsonFormatter extends Context.Tag("package-json-effect/PackageJsonFormatter")<
 	PackageJsonFormatter,

@@ -8,12 +8,14 @@ import { Data } from "effect";
  * accessible when {@link InvalidPackageNameError} appears in public type signatures.
  * Consumers should use {@link InvalidPackageNameError} directly.
  *
- * @internal
+ * @public
  */
 export const InvalidPackageNameErrorBase = Data.TaggedError("InvalidPackageNameError");
 
 /**
  * Indicates that a string could not be used as a valid npm package name.
+ *
+ * @public
  */
 export class InvalidPackageNameError extends InvalidPackageNameErrorBase<{
 	/** The raw input string that failed validation. */
