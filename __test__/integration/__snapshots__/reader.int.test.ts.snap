@@ -21,7 +21,6 @@ exports[`PackageJsonReader integration > boilerplate fixture > snapshot of boile
     "build:prod",
     "ci:build",
     "ci:test",
-    "ci:version",
     "commit:check",
     "commit:init",
     "lint",
