@@ -84,7 +84,7 @@ exports[`Round-trip integration > boilerplate: full output snapshot 1`] = `
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest --watch",
     "typecheck": "turbo run types:check --log-prefix=none --log-order=grouped",
-    "types:check": "tsgo --noEmit",
+    "types:check": "tsc --noEmit",
   },
   "type": "module",
   "version": "0.0.0",
